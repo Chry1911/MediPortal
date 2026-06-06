@@ -1,0 +1,170 @@
+// prisma/schema.prisma
+// MediPortal — Schema del Database
+// Generato automaticamente con: npx prisma generate
+// ERD:                          npx prisma-erd-generator
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../docs/ERD.svg"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// ENUM
+// ─────────────────────────────────────────
+
+enum Ruolo {
+  PAZIENTE
+  MEDICO
+  ADMIN
+}
+
+enum StatoPrenotazione {
+  IN_ATTESA
+  CONFERMATA
+  ANNULLATA
+  COMPLETATA
+}
+
+enum StatoPagamento {
+  DA_PAGARE
+  PAGATO
+  RIMBORSATO
+  SCADUTO
+}
+
+enum StatoReferto {
+  IN_ELABORAZIONE
+  DISPONIBILE
+  ARCHIVIATO
+}
+
+// ─────────────────────────────────────────
+// UTENTE
+// ─────────────────────────────────────────
+
+model Utente {
+  id               String         @id @default(cuid())
+  nome             String
+  cognome          String
+  email            String         @unique
+  passwordHash     String
+  codiceFiscale    String         @unique
+  dataNascita      DateTime
+  telefono         String?
+  ruolo            Ruolo          @default(PAZIENTE)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  // Relazioni paziente
+  prenotazioni     Prenotazione[] @relation("PrenotazionePaziente")
+
+  // Relazioni medico
+  prenotazioniMedico Prenotazione[] @relation("PrenotazioneMedico")
+  refertiCaricati  Referto[]      @relation("RefertoMedico")
+
+  @@map("utenti")
+}
+
+// ─────────────────────────────────────────
+// PRESTAZIONE (catalogo servizi ospedalieri)
+// ─────────────────────────────────────────
+
+model Prestazione {
+  id           String         @id @default(cuid())
+  codice       String         @unique   // es. "VIS-CARD-001"
+  nome         String                   // es. "Visita Cardiologica"
+  descrizione  String?        @db.Text
+  reparto      String                   // es. "Cardiologia"
+  durata       Int                      // minuti
+  costo        Decimal        @db.Decimal(10, 2)
+  attiva       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  prenotazioni Prenotazione[]
+
+  @@map("prestazioni")
+}
+
+// ─────────────────────────────────────────
+// PRENOTAZIONE
+// ─────────────────────────────────────────
+
+model Prenotazione {
+  id              String            @id @default(cuid())
+  codice          String            @unique @default(cuid()) // codice univoco per il paziente
+  dataOra         DateTime
+  stato           StatoPrenotazione @default(IN_ATTESA)
+  note            String?           @db.Text
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // FK
+  pazienteId      String
+  medicoId        String
+  prestazioneId   String
+
+  // Relazioni
+  paziente        Utente            @relation("PrenotazionePaziente", fields: [pazienteId], references: [id])
+  medico          Utente            @relation("PrenotazioneMedico", fields: [medicoId], references: [id])
+  prestazione     Prestazione       @relation(fields: [prestazioneId], references: [id])
+  pagamento       Pagamento?
+  referto         Referto?
+
+  @@map("prenotazioni")
+}
+
+// ─────────────────────────────────────────
+// PAGAMENTO
+// ─────────────────────────────────────────
+
+model Pagamento {
+  id              String         @id @default(cuid())
+  importo         Decimal        @db.Decimal(10, 2)
+  stato           StatoPagamento @default(DA_PAGARE)
+  metodoPagamento String?        // es. "Carta di credito", "Bonifico"
+  dataScadenza    DateTime
+  dataPagamento   DateTime?
+  ricevutaUrl     String?        // URL della ricevuta PDF
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // FK (1:1 con Prenotazione)
+  prenotazioneId  String         @unique
+  prenotazione    Prenotazione   @relation(fields: [prenotazioneId], references: [id])
+
+  @@map("pagamenti")
+}
+
+// ─────────────────────────────────────────
+// REFERTO
+// ─────────────────────────────────────────
+
+model Referto {
+  id              String       @id @default(cuid())
+  titolo          String
+  descrizione     String?      @db.Text
+  fileUrl         String       // path del PDF caricato
+  stato           StatoReferto @default(IN_ELABORAZIONE)
+  dataUpload      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // FK (1:1 con Prenotazione, N:1 con Medico)
+  prenotazioneId  String       @unique
+  medicoId        String
+
+  prenotazione    Prenotazione @relation(fields: [prenotazioneId], references: [id])
+  medico          Utente       @relation("RefertoMedico", fields: [medicoId], references: [id])
+
+  @@map("referti")
+}
