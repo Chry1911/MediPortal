@@ -359,7 +359,7 @@ La specifica OpenAPI 3.0 è definita in [`lib/swagger.ts`](./lib/swagger.ts) e v
 
 ## 👨‍💻 Autore
 
-**[Nome Cognome]**  
+**Christian Cortese**  
 CdS Informatica per le Aziende Digitali (L-31)  
 Anno Accademico 2025/2026
 
