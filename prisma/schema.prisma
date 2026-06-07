@@ -7,14 +7,8 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "../docs/ERD.svg"
-}
-
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 // ─────────────────────────────────────────

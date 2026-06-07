@@ -1,8 +1,7 @@
 // lib/auth.ts
-// Configurazione NextAuth v5
-// Documentazione: https://authjs.dev/getting-started/installation
+// Configurazione NextAuth v4
 
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthOptions, getServerSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -13,9 +12,14 @@ const loginSchema = z.object({
   password: z.string().min(8),
 });
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     Credentials({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
       async authorize(credentials) {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
@@ -50,4 +54,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/auth/login",
   },
-});
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+};
+
+// Helper per Server Components / Route Handlers (equivalente di auth() in v5)
+export const auth = () => getServerSession(authOptions);
+
+export default NextAuth(authOptions);
