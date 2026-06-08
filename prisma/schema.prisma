@@ -4,7 +4,8 @@
 // ERD:                          npx prisma-erd-generator
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {

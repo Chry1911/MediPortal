@@ -2,138 +2,144 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 
 export default function LoginPage() {
+  const t = useTranslations("auth.login");
+  const brand = useTranslations("auth")("brand");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const registered = searchParams.get("registered") === "true";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
 
     const res = await signIn("credentials", {
       email,
       password,
       redirect: false,
+      callbackUrl: "/dashboard",
     });
 
     setLoading(false);
 
     if (res?.error) {
-      setError("Email o password non corretti. Riprova.");
-    } else {
-      router.push("/prenotazioni");
-      router.refresh();
+      setError(t("invalidCredentials"));
+      return;
     }
+
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
-
-        {/* Logo / intestazione */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 mb-4 shadow-lg">
-            <svg className="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 0v4m0-4h4m-4 0H8" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-primary-900">MediPortal</h1>
-          <p className="text-gray-500 mt-1 text-sm">Portale Sanitario Digitale</p>
+        <div className="mb-4 flex justify-end">
+          <LocaleSwitcher />
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl px-8 py-10">
-          <h2 className="text-xl font-semibold text-gray-800 mb-1">Accedi al tuo account</h2>
-          <p className="text-sm text-gray-500 mb-6">
-            Non hai un account?{" "}
-            <Link href="/auth/register" className="text-primary-600 hover:text-primary-700 font-medium">
-              Registrati
-            </Link>
-          </p>
+        <div className="flex flex-col items-center mb-6">
+          <h1 className="text-2xl font-medium text-gray-900">{brand}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t("title")}</p>
+        </div>
 
-          {/* Messaggio di errore */}
-          {error && (
-            <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-5 text-sm">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-7V7a1 1 0 112 0v4a1 1 0 11-2 0zm1 4a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-              </svg>
-              {error}
-            </div>
-          )}
+        <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {registered && (
+              <div className="p-3 rounded-lg border border-green-200 bg-green-50 text-sm text-green-700">
+                {t("registeredSuccess")}
+              </div>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
+            {error && (
+              <div className="p-3 rounded-lg border border-red-200 bg-red-50 text-sm text-red-700">
+                {error}
+              </div>
+            )}
+
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Indirizzo email
+              <label htmlFor="email" className="block text-xs text-gray-500 mb-1.5 font-medium">
+                {t("email")}
               </label>
               <input
                 id="email"
                 type="email"
-                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="nome@esempio.it"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                placeholder={t("emailPlaceholder")}
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            {/* Password */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <span className="text-xs text-primary-600 hover:text-primary-700 cursor-pointer">
-                  Password dimenticata?
-                </span>
+              <label htmlFor="password" className="block text-xs text-gray-500 mb-1.5 font-medium">
+                {t("password")}
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3 py-2.5 pr-10 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500"
+                  aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
               </div>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              />
             </div>
 
-            {/* Submit */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600"
+                />
+                {t("rememberMe")}
+              </label>
+              <span className="text-xs text-blue-700">{t("forgotPassword")}</span>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-semibold py-2.5 rounded-lg text-sm transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-800 disabled:opacity-60"
             >
-              {loading ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                  Accesso in corso…
-                </>
-              ) : (
-                "Accedi"
-              )}
+              {loading ? t("loading") : t("submit")}
             </button>
+
+            <p className="text-center text-xs text-gray-500">
+              {t("noAccount")}{" "}
+              <Link href="/auth/register" className="text-blue-700 font-medium hover:underline">
+                {t("registerLink")}
+              </Link>
+            </p>
           </form>
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          © {new Date().getFullYear()} MediPortal — Tutti i diritti riservati
-        </p>
       </div>
     </div>
   );

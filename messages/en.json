@@ -1,0 +1,59 @@
+{
+  "auth": {
+    "brand": "MediPortal",
+    "login": {
+      "title": "Sign in to your account",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "invalidCredentials": "Invalid email or password.",
+      "forgotPassword": "Forgot password?",
+      "rememberMe": "Remember me",
+      "submit": "Sign in",
+      "loading": "Signing in...",
+      "divider": "or",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Create a patient account",
+      "registeredSuccess": "Registration completed. You can now sign in.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "register": {
+      "title": "Create your patient account",
+      "name": "Name",
+      "surname": "Surname",
+      "taxCode": "Tax Code",
+      "birthDate": "Birth date",
+      "phone": "Phone",
+      "optional": "(optional)",
+      "confirmPassword": "Confirm password",
+      "terms": "I accept MediPortal terms and conditions and privacy policy",
+      "requirementsTitle": "Password requirements",
+      "reqMinLength": "At least 8 characters",
+      "reqUpper": "One uppercase letter",
+      "reqNumber": "One number",
+      "submit": "Create account",
+      "loading": "Creating account...",
+      "alreadyAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "passwordRulesError": "Password does not meet minimum requirements.",
+      "passwordMismatch": "Passwords do not match.",
+      "termsError": "You must accept terms and conditions to continue.",
+      "networkError": "Network error. Please try again later.",
+      "genericError": "Registration failed."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "role": "Role",
+    "email": "Email",
+    "logout": "Sign out",
+    "goToBookings": "Go to bookings"
+  },
+  "locale": {
+    "label": "Language",
+    "it": "Italiano",
+    "en": "English"
+  }
+}

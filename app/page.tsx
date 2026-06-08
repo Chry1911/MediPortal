@@ -4,6 +4,6 @@ import { auth } from "@/lib/auth";
 
 export default async function HomePage() {
   const session = await auth();
-  if (session) redirect("/prenotazioni");
+  if (session) redirect("/dashboard");
   redirect("/auth/login");
 }

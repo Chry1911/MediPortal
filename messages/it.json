@@ -1,0 +1,59 @@
+{
+  "auth": {
+    "brand": "MediPortal",
+    "login": {
+      "title": "Accedi al tuo account",
+      "email": "Email",
+      "emailPlaceholder": "nome@esempio.it",
+      "password": "Password",
+      "invalidCredentials": "Email o password non validi.",
+      "forgotPassword": "Password dimenticata?",
+      "rememberMe": "Ricordami",
+      "submit": "Accedi",
+      "loading": "Accesso in corso...",
+      "divider": "oppure",
+      "noAccount": "Non hai un account?",
+      "registerLink": "Registrati come paziente",
+      "registeredSuccess": "Registrazione completata. Ora puoi accedere.",
+      "showPassword": "Mostra password",
+      "hidePassword": "Nascondi password"
+    },
+    "register": {
+      "title": "Crea il tuo account paziente",
+      "name": "Nome",
+      "surname": "Cognome",
+      "taxCode": "Codice Fiscale",
+      "birthDate": "Data di nascita",
+      "phone": "Telefono",
+      "optional": "(opzionale)",
+      "confirmPassword": "Conferma password",
+      "terms": "Accetto i termini e condizioni e la privacy policy di MediPortal",
+      "requirementsTitle": "Requisiti password",
+      "reqMinLength": "Almeno 8 caratteri",
+      "reqUpper": "Una lettera maiuscola",
+      "reqNumber": "Un numero",
+      "submit": "Crea account",
+      "loading": "Creazione account...",
+      "alreadyAccount": "Hai gia un account?",
+      "loginLink": "Accedi",
+      "passwordRulesError": "La password non rispetta i requisiti minimi.",
+      "passwordMismatch": "Le password non coincidono.",
+      "termsError": "Devi accettare i termini e condizioni per procedere.",
+      "networkError": "Errore di rete. Riprova piu tardi.",
+      "genericError": "Errore durante la registrazione."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Bentornato",
+    "role": "Ruolo",
+    "email": "Email",
+    "logout": "Esci",
+    "goToBookings": "Vai a prenotazioni"
+  },
+  "locale": {
+    "label": "Lingua",
+    "it": "Italiano",
+    "en": "English"
+  }
+}

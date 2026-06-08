@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Dati non validi", details: parsed.error.flatten().fieldErrors },
+        { message: "Dati non validi", details: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     });
     if (esistente) {
       return NextResponse.json(
-        { error: "Email o codice fiscale già registrati." },
+        { message: "Email o codice fiscale gia registrati." },
         { status: 409 }
       );
     }
@@ -59,6 +59,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ utente }, { status: 201 });
   } catch (err) {
     console.error("[register]", err);
-    return NextResponse.json({ error: "Errore interno del server." }, { status: 500 });
+    return NextResponse.json({ message: "Errore interno del server." }, { status: 500 });
   }
 }
