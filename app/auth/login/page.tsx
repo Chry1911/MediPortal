@@ -31,7 +31,6 @@ export default function LoginPage() {
       email,
       password,
       redirect: false,
-      callbackUrl: "/dashboard",
     });
 
     setLoading(false);
@@ -41,7 +40,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    // Redirect a "/" che smista per ruolo (PAZIENTE → /dashboard, MEDICO → /medico/dashboard)
+    router.push("/");
     router.refresh();
   }
 

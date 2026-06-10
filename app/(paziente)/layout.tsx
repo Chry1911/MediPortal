@@ -7,6 +7,10 @@ export default async function PazienteLayout({ children }: { children: React.Rea
   const session = await auth();
   if (!session?.user) redirect("/auth/login");
 
+  // Medici e admin non devono usare il layout paziente
+  const role = (session.user as any).role;
+  if (role === "MEDICO") redirect("/medico/dashboard");
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       <Sidebar />

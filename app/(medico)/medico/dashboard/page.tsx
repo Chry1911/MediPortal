@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, FileText, ClipboardList, Clock } from "lucide-react";
+import { CalendarDays, FileText, ClipboardList, AlertCircle, Clock, User } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
@@ -12,8 +12,13 @@ interface DashData {
   daRefertare: number;
   refertiCaricati: number;
   agendaOggi: {
-    id: string; dataOra: string; stato: string;
-    paziente: string; prestazione: string; durata: number; haReferto: boolean;
+    id: string;
+    dataOra: string;
+    stato: string;
+    paziente: string;
+    prestazione: string;
+    durata: number;
+    haReferto: boolean;
   }[];
 }
 
@@ -25,8 +30,10 @@ const statoBadge: Record<string, string> = {
 };
 
 const statoLabel: Record<string, string> = {
-  IN_ATTESA: "In attesa", CONFERMATA: "Confermata",
-  COMPLETATA: "Completata", ANNULLATA: "Annullata",
+  IN_ATTESA:  "In attesa",
+  CONFERMATA: "Confermata",
+  COMPLETATA: "Completata",
+  ANNULLATA:  "Annullata",
 };
 
 export default function MedicoDashboard() {
@@ -39,39 +46,55 @@ export default function MedicoDashboard() {
       .then((d) => { setData(d); setLoading(false); });
   }, []);
 
-  if (loading) return (
-    <div className="flex h-full items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-700" />
-    </div>
-  );
-  if (!data) return null;
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
+      </div>
+    );
+  }
 
-  const oggi = format(new Date(), "EEEE d MMMM yyyy", { locale: it });
+  if (!data) return null;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard Medico</h1>
-        <p className="mt-1 text-sm text-gray-500 capitalize">{oggi}</p>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500 capitalize">
+          {format(new Date(), "EEEE d MMMM yyyy", { locale: it })}
+        </p>
       </div>
 
-      {/* KPI */}
+      {/* KPI cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[
-          { icon: <CalendarDays className="h-5 w-5 text-blue-600" />, bg: "bg-blue-50", label: "Oggi", value: data.prenotazioniOggi, href: "/medico/prenotazioni" },
-          { icon: <ClipboardList className="h-5 w-5 text-slate-600" />, bg: "bg-slate-50", label: "Totale prenotazioni", value: data.totalePrenotazioni, href: "/medico/prenotazioni" },
-          { icon: <FileText className="h-5 w-5 text-orange-500" />, bg: "bg-orange-50", label: "Da refertare", value: data.daRefertare, href: "/medico/referti" },
-          { icon: <FileText className="h-5 w-5 text-green-600" />, bg: "bg-green-50", label: "Referti caricati", value: data.refertiCaricati, href: "/medico/referti" },
-        ].map((k) => (
-          <Link key={k.label} href={k.href}
-            className="rounded-xl border border-gray-200 bg-white p-5 hover:shadow-md transition-shadow">
-            <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg ${k.bg}`}>
-              {k.icon}
-            </div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{k.label}</p>
-            <p className="mt-1 text-2xl font-bold text-gray-900">{k.value}</p>
-          </Link>
-        ))}
+        <KpiCard
+          icon={<CalendarDays className="h-5 w-5 text-blue-600" />}
+          bg="bg-blue-50"
+          label="Visite oggi"
+          value={data.prenotazioniOggi}
+          href="/medico/prenotazioni"
+        />
+        <KpiCard
+          icon={<ClipboardList className="h-5 w-5 text-indigo-600" />}
+          bg="bg-indigo-50"
+          label="Totale prenotazioni"
+          value={data.totalePrenotazioni}
+          href="/medico/prenotazioni"
+        />
+        <KpiCard
+          icon={<AlertCircle className="h-5 w-5 text-orange-600" />}
+          bg="bg-orange-50"
+          label="Da refertare"
+          value={data.daRefertare}
+          href="/medico/referti"
+        />
+        <KpiCard
+          icon={<FileText className="h-5 w-5 text-green-600" />}
+          bg="bg-green-50"
+          label="Referti caricati"
+          value={data.refertiCaricati}
+          href="/medico/referti"
+        />
       </div>
 
       {/* Agenda del giorno */}
@@ -86,36 +109,38 @@ export default function MedicoDashboard() {
         {data.agendaOggi.length === 0 ? (
           <div className="flex flex-col items-center py-12 text-gray-400">
             <CalendarDays className="h-10 w-10 mb-2" />
-            <p className="text-sm">Nessuna prenotazione per oggi</p>
+            <p className="text-sm">Nessuna visita programmata per oggi</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-50">
             {data.agendaOggi.map((p) => (
               <li key={p.id} className="flex items-center gap-4 px-6 py-4">
-                <div className="flex-shrink-0 w-14 text-center">
-                  <p className="text-lg font-bold text-gray-900 leading-none">
-                    {format(new Date(p.dataOra), "HH:mm")}
-                  </p>
-                  <p className="text-xs text-gray-400 flex items-center justify-center gap-0.5 mt-0.5">
-                    <Clock className="h-3 w-3" />{p.durata}m
-                  </p>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-50">
+                  <User className="h-5 w-5 text-primary-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{p.paziente}</p>
-                  <p className="text-xs text-gray-500">{p.prestazione}</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">{p.paziente}</p>
+                  <p className="text-xs text-gray-500">
+                    {p.prestazione} · {format(new Date(p.dataOra), "HH:mm", { locale: it })}
+                    <span className="inline-flex items-center gap-0.5 ml-1 text-gray-400">
+                      <Clock className="h-3 w-3" />{p.durata}m
+                    </span>
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statoBadge[p.stato]}`}>
                     {statoLabel[p.stato]}
                   </span>
                   {p.stato === "COMPLETATA" && !p.haReferto && (
-                    <Link href="/medico/referti"
-                      className="text-xs bg-orange-100 text-orange-700 font-medium rounded px-2 py-0.5 hover:bg-orange-200">
+                    <Link
+                      href="/medico/referti"
+                      className="text-xs font-medium text-orange-600 bg-orange-50 rounded px-2 py-0.5 hover:bg-orange-100"
+                    >
                       Carica referto
                     </Link>
                   )}
                   {p.haReferto && (
-                    <span className="text-xs bg-green-100 text-green-700 font-medium rounded px-2 py-0.5">
+                    <span className="text-xs font-medium text-green-600 bg-green-50 rounded px-2 py-0.5">
                       Referto ✓
                     </span>
                   )}
@@ -126,19 +151,61 @@ export default function MedicoDashboard() {
         )}
       </div>
 
-      {/* Quick actions */}
+      {/* Quick links */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {[
-          { href: "/medico/prenotazioni", icon: <CalendarDays className="h-5 w-5" />, label: "Vedi prenotazioni", color: "text-blue-600 bg-blue-50 hover:bg-blue-100" },
-          { href: "/medico/prestazioni",  icon: <ClipboardList className="h-5 w-5" />, label: "Gestisci prestazioni", color: "text-slate-600 bg-slate-50 hover:bg-slate-100" },
-          { href: "/medico/referti",      icon: <FileText className="h-5 w-5" />, label: "Carica referti", color: "text-green-600 bg-green-50 hover:bg-green-100" },
-        ].map((q) => (
-          <Link key={q.href} href={q.href}
-            className={`flex items-center gap-3 rounded-xl border border-transparent p-4 font-medium text-sm transition-colors ${q.color}`}>
-            {q.icon}{q.label}
-          </Link>
-        ))}
+        <QuickLink
+          href="/medico/prenotazioni"
+          icon={<CalendarDays className="h-5 w-5" />}
+          label="Vedi prenotazioni"
+          color="text-blue-600 bg-blue-50 hover:bg-blue-100"
+        />
+        <QuickLink
+          href="/medico/prestazioni"
+          icon={<ClipboardList className="h-5 w-5" />}
+          label="Gestisci prestazioni"
+          color="text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
+        />
+        <QuickLink
+          href="/medico/referti"
+          icon={<FileText className="h-5 w-5" />}
+          label="Carica referti"
+          color="text-green-600 bg-green-50 hover:bg-green-100"
+        />
       </div>
     </div>
+  );
+}
+
+function KpiCard({
+  icon, bg, label, value, sub, href,
+}: {
+  icon: React.ReactNode; bg: string; label: string;
+  value: string | number; sub?: string; href: string;
+}) {
+  return (
+    <Link href={href} className="rounded-xl border border-gray-200 bg-white p-5 hover:shadow-md transition-shadow">
+      <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg ${bg}`}>
+        {icon}
+      </div>
+      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
+      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    </Link>
+  );
+}
+
+function QuickLink({
+  href, icon, label, color,
+}: {
+  href: string; icon: React.ReactNode; label: string; color: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-3 rounded-xl border border-transparent p-4 font-medium text-sm transition-colors ${color}`}
+    >
+      {icon}
+      {label}
+    </Link>
   );
 }
