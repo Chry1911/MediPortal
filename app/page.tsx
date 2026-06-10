@@ -1,4 +1,4 @@
-// app/page.tsx — Homepage pubblica / redirect al login
+// app/page.tsx — redirect alla dashboard se loggato, altrimenti al login
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
