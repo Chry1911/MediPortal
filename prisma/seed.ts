@@ -2,10 +2,19 @@
 // Dati di esempio per sviluppo
 // Esegui con: npm run db:seed
 
-import { PrismaClient, Ruolo } from "@prisma/client";
+import { PrismaClient, Ruolo } from "../generated/prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaMariaDb({
+  host: process.env.DATABASE_HOST ?? "127.0.0.1",
+  port: parseInt(process.env.DATABASE_PORT ?? "3306"),
+  user: process.env.DATABASE_USER ?? "root",
+  password: process.env.DATABASE_PASSWORD ?? "1234root",
+  database: process.env.DATABASE_NAME ?? "mediaportal",
+  connectionLimit: 5,
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 Seeding database MediPortal...");
@@ -50,7 +59,7 @@ async function main() {
       email: "paziente@example.com",
       passwordHash,
       codiceFiscale: "BNCNNA90C41L219K",
-      dataNascita: new Date("1990-03-41"),
+      dataNascita: new Date("1990-03-14"),
       telefono: "+39 333 1234567",
       ruolo: Ruolo.PAZIENTE,
     },

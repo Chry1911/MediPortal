@@ -368,3 +368,8 @@ Anno Accademico 2025/2026
 ## 📄 Licenza
 
 Progetto accademico — uso esclusivamente didattico.
+
+
+## Credenziali di test portale admin
+
+**admin@mediaportal.it / Password123!**

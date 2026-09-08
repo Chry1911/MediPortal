@@ -18,37 +18,39 @@ const updateSchema = z.object({
   attiva: z.boolean().optional(),
 });
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
   if (!requireMedico((session.user as any).role))
     return NextResponse.json({ error: "Accesso riservato ai medici" }, { status: 403 });
 
+  const { id } = await params;
   const body = await req.json();
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success)
     return NextResponse.json({ error: "Dati non validi" }, { status: 400 });
 
-  const prestazione = await prisma.prestazione.findUnique({ where: { id: params.id } });
+  const prestazione = await prisma.prestazione.findUnique({ where: { id } });
   if (!prestazione) return NextResponse.json({ error: "Prestazione non trovata" }, { status: 404 });
 
   const updated = await prisma.prestazione.update({
-    where: { id: params.id },
+    where: { id },
     data: parsed.data,
   });
 
   return NextResponse.json({ ...updated, costo: Number(updated.costo) });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
   if (!requireMedico((session.user as any).role))
     return NextResponse.json({ error: "Accesso riservato ai medici" }, { status: 403 });
 
+  const { id } = await params;
   // Soft delete: disattiva invece di eliminare (preserva storico)
   await prisma.prestazione.update({
-    where: { id: params.id },
+    where: { id },
     data: { attiva: false },
   });
 

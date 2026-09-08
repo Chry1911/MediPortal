@@ -12,21 +12,22 @@ const updateSchema = z.object({
   stato: z.enum(["DISPONIBILE", "ARCHIVIATO"]).optional(),
 });
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
   if ((session.user as any).role !== "MEDICO")
     return NextResponse.json({ error: "Accesso riservato ai medici" }, { status: 403 });
 
   const medicoId = (session.user as any).id;
+  const { id } = await params;
 
-  const referto = await prisma.referto.findFirst({ where: { id: params.id, medicoId } });
+  const referto = await prisma.referto.findFirst({ where: { id, medicoId } });
   if (!referto) return NextResponse.json({ error: "Referto non trovato" }, { status: 404 });
 
   const body = await req.json();
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Dati non validi" }, { status: 400 });
 
-  const updated = await prisma.referto.update({ where: { id: params.id }, data: parsed.data });
+  const updated = await prisma.referto.update({ where: { id }, data: parsed.data });
   return NextResponse.json(updated);
 }

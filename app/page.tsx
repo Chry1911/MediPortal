@@ -10,7 +10,7 @@ export default async function HomePage() {
   const role = (session.user as any).role;
 
   if (role === "MEDICO") redirect("/medico/dashboard");
-  if (role === "ADMIN")  redirect("/dashboard");
+  if (role === "ADMIN")  redirect("/admin/dashboard");
 
   // PAZIENTE (default)
   redirect("/dashboard");

@@ -6,7 +6,9 @@ import TopBar from "@/components/layout/TopBar";
 export default async function MedicoLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/auth/login");
-  if ((session.user as any).role !== "MEDICO") redirect("/dashboard");
+  const role = (session.user as any).role;
+  if (role === "ADMIN") redirect("/admin/dashboard");
+  if (role !== "MEDICO") redirect("/dashboard");
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">

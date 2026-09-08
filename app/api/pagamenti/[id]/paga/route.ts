@@ -9,12 +9,12 @@ const pagaSchema = z.object({
   metodoPagamento: z.enum(["Carta di credito", "Carta di debito", "Bonifico", "Contanti"]),
 });
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
 
   const userId = (session.user as any).id;
-  const { id } = params;
+  const { id } = await params;
 
   const pagamento = await prisma.pagamento.findFirst({
     where: { id, prenotazione: { pazienteId: userId } },

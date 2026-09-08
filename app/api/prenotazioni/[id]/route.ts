@@ -4,12 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
 
   const userId = (session.user as any).id;
-  const { id } = params;
+  const { id } = await params;
 
   const prenotazione = await prisma.prenotazione.findFirst({
     where: { id, pazienteId: userId },
